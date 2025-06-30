@@ -6,6 +6,7 @@ from data_loader import fetch_yahoo, load_csv, generate_gbm
 from benchmarks import vwap, twap, harmonic_mean
 from strategies import simulate_twap, simulate_volume_participation
 from simulation import run_monte_carlo
+from descriptive import run_descriptive_analysis
 
 # ---- UI CONFIG ----
 st.set_page_config(page_title="Modular Buyback Tool", layout="wide")
@@ -77,32 +78,7 @@ if 'df' in st.session_state:
 
     # --- TAB 1: Descriptive Analysis ---
     with tab_desc:
-        st.subheader("Full Descriptive Statistics")
-        prices = df['Close']
-        stats = prices.describe().rename({
-            'count':'Count',
-            'mean':'Mean',
-            'std':'Std Dev',
-            'min':'Min',
-            '25%':'25th %ile',
-            '50%':'Median',
-            '75%':'75th %ile',
-            'max':'Max'
-        })
-        st.table(stats.to_frame("Price"))
-
-        st.subheader("Price Distribution Histogram")
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots(figsize=(8, 4))
-        ax.hist(prices, bins=30, edgecolor='black')
-        ax.set_xlabel("Price")
-        ax.set_ylabel("Frequency")
-        plt.tight_layout()
-        st.pyplot(fig)
-
-        st.subheader("Time Series of Price")
-        st.line_chart(df.set_index('Date')['Close'], height=300)
-
+        run_descriptive_analysis(df)
     # --- TAB 2: Overview & Benchmarks ---
     with tab_overview:
         st.subheader("Price Data Preview")
