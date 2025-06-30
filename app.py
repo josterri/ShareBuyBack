@@ -7,7 +7,13 @@ from benchmarks import vwap, twap, harmonic_mean
 from strategies import simulate_twap, simulate_volume_participation
 from simulation import run_monte_carlo
 from descriptive import run_descriptive_analysis
+from strategies_tab import run_execution_tab
+from monte_carlo_tab import run_monte_carlo_tab
+from running_benchmarks_tab import run_running_benchmarks_tab
+from overview import run_overview_tab
 
+from simulation import run_monte_carlo
+from data_loader import fetch_yahoo, load_csv, generate_gbm
 # ---- UI CONFIG ----
 st.set_page_config(page_title="Modular Buyback Tool", layout="wide")
 st.title("Modular Share Buyback Pre-Trade Tool")
@@ -69,10 +75,11 @@ if 'df' in st.session_state:
     df = df.sort_values('Date').reset_index(drop=True)
 
     # ---- TABS ----
-    tab_desc, tab_overview, tab_exec, tab_mc = st.tabs([
+    tab_desc, tab_overview, tab_exec, tab_run, tab_mc  = st.tabs([
         "📊 Descriptive Analysis",
         "📈 Overview & Benchmarks",
         "⚙️ Execution Strategies",
+        "📊 Running Benchmarks",
         "🎲 Monte Carlo Simulation"
     ])
 
@@ -81,52 +88,22 @@ if 'df' in st.session_state:
         run_descriptive_analysis(df)
     # --- TAB 2: Overview & Benchmarks ---
     with tab_overview:
-        st.subheader("Price Data Preview")
-        st.dataframe(df.head(10), use_container_width=True)
-        st.line_chart(df.set_index('Date')['Close'], height=250)
-
-        st.subheader("Benchmark Metrics")
-        vw = vwap(df['Close'], df['Volume'])
-        tw = twap(df['Close'])
-        hm = harmonic_mean(df['Close'])
-        c1, c2, c3 = st.columns(3)
-        c1.metric("VWAP", f"{vw:.3f}")
-        c2.metric("TWAP (mean)", f"{tw:.3f}")
-        c3.metric("Harmonic Mean", f"{hm:.3f}")
-
+        run_overview_tab(df)
     # --- TAB 3: Execution Strategies ---
     with tab_exec:
-        st.subheader("TWAP Strategy")
-        twap_df = simulate_twap(df, total_shares)
-        st.dataframe(twap_df, use_container_width=True)
-        st.download_button("Download TWAP CSV",
-                           twap_df.to_csv(index=False),
-                           "twap_log.csv")
-
-        st.subheader("Volume Participation Strategy")
-        vp_df = simulate_volume_participation(df, vp_pct)
-        st.dataframe(vp_df, use_container_width=True)
-        st.download_button("Download VP CSV",
-                           vp_df.to_csv(index=False),
-                           "vp_log.csv")
-
-    # --- TAB 4: Monte Carlo Simulation ---
+        run_execution_tab(df, total_shares, vp_pct)
+        
+    # --- TAB 4: Running Benchmarks ---
+    with tab_run:
+        run_running_benchmarks_tab(df)
+    # --- TAB 5: Monte Carlo Simulation ---
     with tab_mc:
-        st.subheader("Monte Carlo Cost Distribution")
-        S0_last = df['Close'].iloc[-1]
-        avg_vol = df['Volume'].mean()
-        costs_df = run_monte_carlo(
-            S0=S0_last,
-            avg_vol=avg_vol,
-            mu=mc_drift,
-            sigma=mc_vol,
-            horizon=mc_horiz,
-            sims=mc_sims,
+        run_monte_carlo_tab(
+            df,
+            mc_drift=mc_drift,
+            mc_vol=mc_vol,
+            mc_horiz=mc_horiz,
+            mc_sims=mc_sims,
             total_shares=total_shares,
             participation_frac=vp_pct
         )
-        st.write(costs_df.describe())
-        st.bar_chart(costs_df, height=300)
-        st.download_button("Download MC Results",
-                           costs_df.to_csv(index=False),
-                           "mc_costs.csv")
