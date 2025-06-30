@@ -1,0 +1,104 @@
+https://github.com/josterri/ShareBuyBack
+
+
+
+
+## ✅ 1. **Project Goals**
+
+* Estimate expected cost of buyback using historical data
+* Simulate execution under different strategies
+* Compare benchmark prices: VWAP, TWAP, harmonic mean
+* Visualize execution paths and price risk
+* Export results (CSV, PDF)
+* Make accessible via web browser
+
+---
+
+## 🧱 2. **Technical Stack**
+
+| Component          | Tool / Language                    |
+| ------------------ | ---------------------------------- |
+| Core Language      | Python 3.x                         |
+| Interface          | Streamlit                          |
+| Data Handling      | pandas, NumPy                      |
+| Visualization      | Plotly or matplotlib               |
+| Deployment         | Streamlit Cloud or Docker          |
+| Optional Live Data | yfinance, Alpha Vantage (optional) |
+
+---
+
+## 🗂 3. **Folder Structure**
+
+```
+buyback_tool/
+├── app.py                   ← Main Streamlit app
+├── core/
+│   ├── simulator.py         ← Simulation logic (buyback execution)
+│   ├── benchmarks.py        ← VWAP, TWAP, harmonic mean calculations
+│   └── utils.py             ← Data loading and validation
+├── data/
+│   └── sample_data.csv      ← Example input data (Close, Volume)
+├── requirements.txt         ← Dependencies
+├── README.md                ← Project description and instructions
+```
+
+---
+
+## 🔧 4. **Core Functionalities**
+
+| Feature                              | File/Module     | Status        |
+| ------------------------------------ | --------------- | ------------- |
+| Load price & volume data             | `utils.py`      | ✅ Implemented |
+| Simulate uniform execution           | `simulator.py`  | ✅ Implemented |
+| Calculate VWAP, TWAP, Harmonic mean  | `benchmarks.py` | ✅ Implemented |
+| Streamlit frontend                   | `app.py`        | 🔲 To do      |
+| CSV upload and data preview          | `app.py`        | 🔲 To do      |
+| User input (buyback \$ amount, days) | `app.py`        | 🔲 To do      |
+| Monte Carlo simulation (optional)    | `simulator.py`  | 🔲 Optional   |
+| Plot execution prices                | `app.py`        | 🔲 To do      |
+| Benchmark comparison chart           | `app.py`        | 🔲 To do      |
+| Export CSV or PDF report             | `app.py`        | 🔲 To do      |
+
+---
+
+## 📦 5. **Input Requirements**
+
+The user must provide:
+
+* CSV file with at least: `Date`, `Close`, `Volume`
+* Buyback amount in USD (e.g., \$10,000,000)
+* Execution horizon (e.g., 30–125 trading days)
+
+---
+
+## 📈 6. **Output Metrics**
+
+* Expected average execution price
+* Deviation from benchmark (in bps or %)
+* Execution cost chart vs. time
+* Optionally: distribution of outcomes (if simulating)
+
+---
+
+## 🌐 7. **Deployment Options**
+
+* **Streamlit Cloud**: Free, easy setup, public URL
+* **Docker container**: If internal-only or for enterprise hosting
+* **Streamlit + NGINX**: For a more secure production deployment
+
+---
+
+## ✅ 8. **Next Steps**
+
+1. ✔ Finish simulation and benchmark modules ✅
+2. 🔲 Implement `app.py` interface
+3. 🔲 Add visualizations (Plotly)
+4. 🔲 Add data upload and validation
+5. 🔲 Add benchmark comparison
+6. 🔲 Add export functions (CSV/PDF)
+7. 🔲 Test and finalize layout
+8. 🔲 Deploy to Streamlit Cloud (optional)
+
+---
+
+Would you like me to proceed with implementing a complete version of `app.py` as the next step?
