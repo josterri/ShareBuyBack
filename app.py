@@ -24,7 +24,7 @@ with st.sidebar:
     load_btn = st.button("Load / Generate Data")
     st.markdown("---")
     st.header("1. Monte Carlo")
-    mc_sims   = st.number_input("Simulations", 1, 10_000, 500)
+    mc_sims   = st.number_input("Simulations", 1, 10_000, 100)
     mc_drift  = st.number_input("MC Drift (%)", 0.0, 100.0, 0.0) / 100.0
     mc_vol    = st.number_input("MC Vol (%)",   0.0, 100.0,15.0) / 100.0
     mc_horiz  = st.number_input("MC Days",       1, 2_520, 125)
