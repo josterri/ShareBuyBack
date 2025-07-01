@@ -20,8 +20,19 @@ st.title("Modular Share Buyback Pre-Trade Tool")
 
 # ---- SIDEBAR: PARAMETERS ----
 with st.sidebar:
-    st.header("1. Data Source")
-    source = st.radio("Load data from:", ["Yahoo Finance", "Upload CSV", "Synthetic GBM"])
+
+    load_btn = st.button("Load / Generate Data")
+    st.markdown("---")
+    st.header("1. Monte Carlo")
+    mc_sims   = st.number_input("Simulations", 1, 10_000, 500)
+    mc_drift  = st.number_input("MC Drift (%)", 0.0, 100.0, 0.0) / 100.0
+    mc_vol    = st.number_input("MC Vol (%)",   0.0, 100.0,15.0) / 100.0
+    mc_horiz  = st.number_input("MC Days",       1, 2_520, 125)
+
+
+    
+    st.header("2. Data Source")
+    source = st.radio("Load data from:", ["Synthetic GBM","Yahoo Finance", "Upload CSV"])
     
     # common params
     start = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
@@ -34,23 +45,15 @@ with st.sidebar:
         upload = st.file_uploader("CSV file", type=["csv"])
     else:
         S0    = st.number_input("Initial Price", 10.0, 1e4, 100.0)
-        mu    = st.number_input("Drift (%)", 0.0, 100.0, 5.0) / 100.0
-        sigma = st.number_input("Volatility (%)", 0.0, 100.0, 20.0) / 100.0
+        mu    = st.number_input("Drift (%)", 0.0, 100.0, 0.0) / 100.0
+        sigma = st.number_input("Volatility (%)", 0.0, 100.0, 15.0) / 100.0
         avgV  = st.number_input("Avg Volume", 1, 10_000_000, 1_000_000)
 
     st.markdown("---")
-    st.header("2. Strategy Params")
+    st.header("3. Strategy Params")
     total_shares = st.number_input("TWAP: total shares", 1, 1_000_000, 10_000)
     vp_pct        = st.number_input("VP % of volume", 0.0, 100.0, 10.0) / 100.0
 
-    st.markdown("---")
-    st.header("3. Monte Carlo")
-    mc_sims   = st.number_input("Simulations", 1, 10_000, 500)
-    mc_drift  = st.number_input("MC Drift (%)", 0.0, 100.0, 5.0) / 100.0
-    mc_vol    = st.number_input("MC Vol (%)",   0.0, 100.0,20.0) / 100.0
-    mc_horiz  = st.number_input("MC Days",       1, 2_520, 252)
-
-    load_btn = st.button("Load / Generate Data")
 
 # ---- DATA LOADING FUNCTION ----
 def load_data():
