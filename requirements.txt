@@ -3,7 +3,7 @@ io
 matplotlib
 numpy
 pandas
-plotly
+plotly>=5.10.0
 pytest
 socket
 streamlit
