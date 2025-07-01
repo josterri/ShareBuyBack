@@ -157,19 +157,30 @@ def run_monte_carlo_tab(
     """)
     
 
-
-    # 4) Simulated Price Paths
+    # 3) Simulated Price Paths
     st.subheader("3. Simulated Price Paths")
-    st.markdown("All simulated GBM price paths over the horizon.")
-    df_paths = pd.DataFrame(price_paths).reset_index().melt(
-        id_vars='index', var_name='simulation', value_name='price'
-    ).rename(columns={'index': 'Day'})
+    st.markdown("""
+Plot up to 100 simulated price trajectories under the GBM model to illustrate
+the range and variability of possible future paths over the specified horizon.
+""")
+
+    # Limit to at most 100 paths for plotting
+    max_paths = min(price_paths.shape[1], 100)
+    paths_to_plot = price_paths[:, :max_paths]
+
+    df_paths = (
+        pd.DataFrame(paths_to_plot)
+          .reset_index()
+          .melt(id_vars='index', var_name='simulation', value_name='price')
+          .rename(columns={'index': 'Day'})
+    )
+
     fig_paths = px.line(
         df_paths,
         x='Day', y='price', color='simulation',
-        line_group='simulation',
+        line_group='simulation', 
         labels={'price': 'Price', 'Day': 'Day'},
-        title="Simulated GBM Price Paths"
+        title=f"Simulated GBM Price Paths (showing {max_paths} of {price_paths.shape[1]} sims)"
     )
     fig_paths.update_layout(showlegend=False)
     st.plotly_chart(fig_paths, use_container_width=True)

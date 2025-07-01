@@ -1,6 +1,12 @@
-streamlit
-pandas
-numpy
-yfinance
 fpdf
+io
+matplotlib
+numpy
+pandas
+plotly
 pytest
+socket
+streamlit
+unittest
+webbrowser
+yfinance

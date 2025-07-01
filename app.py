@@ -15,8 +15,8 @@ from overview import run_overview_tab
 from simulation import run_monte_carlo
 from data_loader import fetch_yahoo, load_csv, generate_gbm
 # ---- UI CONFIG ----
-st.set_page_config(page_title="Modular Buyback Tool", layout="wide")
-st.title("Modular Share Buyback Pre-Trade Tool")
+st.set_page_config(page_title="Share Buyback Tool", layout="wide")
+st.title("Share Buyback Pre-Trade Tool")
 
 # ---- SIDEBAR: PARAMETERS ----
 with st.sidebar:
