@@ -4,6 +4,12 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
 from simulation import run_monte_carlo
 
 @st.cache_data(show_spinner=False)
@@ -18,6 +24,81 @@ def cached_run_mc(S0, avg_vol, mu, sigma, horizon, sims, total_shares, participa
         total_shares=total_shares,
         participation_frac=participation_frac
     )
+
+
+def run_historical_execution_chart(df: pd.DataFrame, total_shares: float):
+    """
+    Plots:
+      - Daily Price
+      - Running Average Execution Price under:
+          • Fixed-Shares (TWAP)
+          • Fixed-Notional (constant USD)
+      - Secondary axis: Price difference in bps between the two
+    """
+    # 1) Compute running TWAP (fixed shares)
+    n = len(df)
+    fs_per_day = total_shares / n
+    cum_shares_fs = np.arange(1, n+1) * fs_per_day
+    cum_cost_fs   = (df['Close'] * fs_per_day).cumsum()
+    avg_price_fs  = cum_cost_fs / cum_shares_fs
+
+    # 2) Compute running USD strategy
+    S0 = df['Close'].iloc[0]
+    usd_notional = total_shares * S0 / n
+    shares_usd    = usd_notional / df['Close']
+    cum_shares_usd = shares_usd.cumsum()
+    cum_cost_usd   = usd_notional * np.arange(1, n+1)
+    avg_price_usd  = cum_cost_usd / cum_shares_usd
+
+    # 3) bps difference
+    bps_diff = (avg_price_fs - avg_price_usd) / avg_price_fs * 1e4
+
+    # assemble into one DataFrame
+    df_exec = pd.DataFrame({
+        'Date':        df['Date'],
+        'Daily Price': df['Close'],
+        'Fixed-Shares Price': avg_price_fs,
+        'Fixed-Notional Price': avg_price_usd,
+        'Diff (bps)':  bps_diff
+    }).set_index('Date')
+
+    # 4) Plot with secondary axis
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(
+        go.Scatter(x=df_exec.index, y=df_exec['Daily Price'],
+                   name='Daily Price', line=dict(color='black')),
+        secondary_y=False
+    )
+    fig.add_trace(
+        go.Scatter(x=df_exec.index, y=df_exec['Fixed-Shares Price'],
+                   name='Fixed-Shares', line=dict(color='orange')),
+        secondary_y=False
+    )
+    fig.add_trace(
+        go.Scatter(x=df_exec.index, y=df_exec['Fixed-Notional Price'],
+                   name='Fixed-Notional', line=dict(color='blue')),
+        secondary_y=False
+    )
+    fig.add_trace(
+        go.Scatter(x=df_exec.index, y=df_exec['Diff (bps)'],
+                   name='Price Δ (bps)', line=dict(color='green', dash='dash')),
+        secondary_y=True
+    )
+
+    fig.update_layout(
+        title="Price & Running Execution Prices (with Δ in bps)",
+        xaxis_title="Date",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    fig.update_yaxes(title_text="Price", secondary_y=False)
+    fig.update_yaxes(title_text="Difference (bps)", secondary_y=True)
+
+    st.subheader("One Execution Example")
+    st.markdown(
+        "This chart shows one price series along with the running average execution price\n"
+        "if you had bought **fixed shares** each day versus **fixed USD** each day, and the bps difference."
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 def run_monte_carlo_tab(
     df: pd.DataFrame,
@@ -117,7 +198,7 @@ def run_monte_carlo_tab(
     """)
     st.metric("Mean bps Δ", f"{b_mean:.1f}", f"σ={b_std:.1f}")
 
-
+    run_historical_execution_chart(df, total_shares)
    
     # 1) Price Advantage in Basis Points
     st.subheader("2. Price Advantage in Basis Points")
