@@ -36,7 +36,7 @@ def run_monte_carlo_tab(
       4. Simulated price paths
     """
  # ——— Introduction ———
-    st.markdown("# Monte Carlo Simulation Results")
+    st.markdown("# TWAP vs Fixed-Notional")
     st.markdown(
         "This section runs a Geometric Brownian Motion simulation for future prices,\n"
         "then compares two execution strategies:\n\n"
@@ -46,6 +46,8 @@ def run_monte_carlo_tab(
         "- Price‐based outperformance in basis points\n"
         "- All simulated price paths"
     )
+    
+    
     # Prepare constants
     S0      = df['Close'].iloc[-1]
     avg_vol = df['Volume'].mean()
@@ -58,7 +60,12 @@ def run_monte_carlo_tab(
         total_shares, participation_frac
     )
 
-  
+    st.markdown(
+        f"- **Horizon:** {mc_horiz} days\n"
+        f"- **Drift:** {mc_drift:.1%} annual\n"
+        f"- **Volatility:** {mc_vol:.1%} annual\n"
+    )
+
     # Identify cost columns dynamically
     cost_cols = list(costs_df.columns)
     twap_col, vp_col = cost_cols
@@ -89,7 +96,7 @@ def run_monte_carlo_tab(
         df_bps,
         x='Price Outperformance (bps)',
         nbins=200,
-        title='Distribution of Price Outperformance (bps)'
+        title='Distribution of Price Outperformance (bps) vs TWAP'
     )
     fig_bps.update_layout(
         xaxis_title='Price Outperformance (bps)',
@@ -110,14 +117,6 @@ def run_monte_carlo_tab(
     """)
     st.metric("Mean bps Δ", f"{b_mean:.1f}", f"σ={b_std:.1f}")
 
-    st.markdown(
-        f"## Monte Carlo Setup\n"
-        f"- **Initial Price (S₀):** ${S0:.2f}\n"
-        f"- **Simulations:** {mc_sims}\n"
-        f"- **Horizon:** {mc_horiz} days\n"
-        f"- **Drift:** {mc_drift:.1%} annual\n"
-        f"- **Volatility:** {mc_vol:.1%} annual\n"
-    )
 
    
     # 1) Price Advantage in Basis Points

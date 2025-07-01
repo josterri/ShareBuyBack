@@ -78,12 +78,12 @@ if 'df' in st.session_state:
     df = df.sort_values('Date').reset_index(drop=True)
 
     # ---- TABS ----
-    tab_desc, tab_overview, tab_exec, tab_run, tab_mc  = st.tabs([
+    tab_mc, tab_desc, tab_overview, tab_exec, tab_run= st.tabs([
+        "🎲 TWAP vs Fixed-Notional",
         "📊 Descriptive Analysis",
         "📈 Overview & Benchmarks",
         "⚙️ Execution Strategies",
-        "📊 Running Benchmarks",
-        "🎲 Monte Carlo Simulation"
+        "📊 Running Benchmarks"
     ])
 
     # --- TAB 1: Descriptive Analysis ---
