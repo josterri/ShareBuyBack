@@ -1,9 +1,8 @@
 fpdf
-io
 matplotlib
 numpy
 pandas
-plotly>=5.10.0
+plotly
 pytest
 socket
 streamlit
