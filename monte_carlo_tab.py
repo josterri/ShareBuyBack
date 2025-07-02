@@ -255,6 +255,8 @@ the range and variability of possible future paths over the specified horizon.
           .rename(columns={'index': 'Day'})
     )
 
+    expected_path = S0 * np.exp(np.arange(mc_horiz + 1) * mu_d)
+
     fig_paths = px.line(
         df_paths,
         x='Day', y='price', color='simulation',
@@ -262,5 +264,12 @@ the range and variability of possible future paths over the specified horizon.
         labels={'price': 'Price', 'Day': 'Day'},
         title=f"Simulated GBM Price Paths (showing {max_paths} of {price_paths.shape[1]} sims)"
     )
+    fig_paths.add_scatter(
+    x=np.arange(mc_horiz + 1),
+    y=expected_path,
+    name="Expected Path (Drift Only)",
+    line=dict(color="red", width=2, dash="dash")
+    )
+
     fig_paths.update_layout(showlegend=False)
     st.plotly_chart(fig_paths, use_container_width=True)

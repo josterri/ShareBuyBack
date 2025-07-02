@@ -20,39 +20,29 @@ st.title("Share Buyback Pre-Trade Tool")
 
 # ---- SIDEBAR: PARAMETERS ----
 with st.sidebar:
+    st.header("Monte Carlo Simulation Parameters")
+    mc_sims = st.number_input("Simulations", min_value=1, max_value=10_000, value=100)
+    mc_drift = st.number_input("Drift (annualized %)", min_value=0.0, max_value=100.0, value=0.0, step=0.1) / 100.0
+    mc_vol = st.number_input("Volatility (annualized %)", min_value=0.0, max_value=100.0, value=15.0, step=0.1) / 100.0
+    mc_horiz = st.number_input("Horizon (days)", min_value=1, max_value=2520, value=125)
 
-    load_btn = st.button("Load / Generate Data")
     st.markdown("---")
-    st.header("1. Monte Carlo")
-    mc_sims   = st.number_input("Simulations", 1, 10_000, 100)
-    mc_drift  = st.number_input("MC Drift (%)", 0.0, 100.0, 0.0) / 100.0
-    mc_vol    = st.number_input("MC Vol (%)",   0.0, 100.0,15.0) / 100.0
-    mc_horiz  = st.number_input("MC Days",       1, 2_520, 125)
+    st.header("Synthetic Data (GBM)")
 
-
-    
-    st.header("2. Data Source")
-    source = st.radio("Load data from:", ["Synthetic GBM","Yahoo Finance", "Upload CSV"])
-    
-    # common params
     start = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
-    end   = st.date_input("End Date",   value=pd.to_datetime("2023-12-31"))
-    
-    # source-specific
-    if source == "Yahoo Finance":
-        ticker = st.text_input("Ticker", "AAPL")
-    elif source == "Upload CSV":
-        upload = st.file_uploader("CSV file", type=["csv"])
-    else:
-        S0    = st.number_input("Initial Price", 10.0, 1e4, 100.0)
-        mu    = st.number_input("Drift (%)", 0.0, 100.0, 0.0) / 100.0
-        sigma = st.number_input("Volatility (%)", 0.0, 100.0, 15.0) / 100.0
-        avgV  = st.number_input("Avg Volume", 1, 10_000_000, 1_000_000)
+    end = st.date_input("End Date", value=pd.to_datetime("2023-12-31"))
+    S0 = st.number_input("Initial Price", min_value=1.0, max_value=10_000.0, value=100.0)
+    mu = st.number_input("Drift (GBM %) ", min_value=-50.0, max_value=100.0, value=0.0, step=0.1) / 100.0
+    sigma = st.number_input("Volatility (GBM %)", min_value=0.0, max_value=100.0, value=15.0, step=0.1) / 100.0
+    avgV = st.number_input("Average Daily Volume", min_value=1, max_value=10_000_000, value=1_000_000)
 
     st.markdown("---")
-    st.header("3. Strategy Params")
-    total_shares = st.number_input("TWAP: total shares", 1, 1_000_000, 10_000)
-    vp_pct        = st.number_input("VP % of volume", 0.0, 100.0, 10.0) / 100.0
+    st.header("Execution Strategy")
+    total_shares = st.number_input("Total Shares (TWAP)", min_value=1, max_value=1_000_000, value=10_000)
+    vp_pct = st.number_input("Participation Rate (%)", min_value=0.0, max_value=100.0, value=10.0, step=0.5) / 100.0
+
+    st.markdown("---")
+    load_btn = st.button("Generate Synthetic Data")
 
 
 # ---- DATA LOADING FUNCTION ----
