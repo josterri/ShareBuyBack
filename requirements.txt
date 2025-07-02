@@ -5,5 +5,4 @@ pandas
 plotly
 pytest
 streamlit
-webbrowser
 yfinance
