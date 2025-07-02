@@ -4,16 +4,13 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
-import streamlit as st
-import pandas as pd
-import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 from simulation import run_monte_carlo
 
 @st.cache_data(show_spinner=False)
-def cached_run_mc(S0, avg_vol, mu, sigma, horizon, sims, total_shares, participation_frac):
+def cached_run_mc(S0, avg_vol, mu, sigma, horizon, sims, total_shares):
     return run_monte_carlo(
         S0=S0,
         avg_vol=avg_vol,
@@ -21,8 +18,7 @@ def cached_run_mc(S0, avg_vol, mu, sigma, horizon, sims, total_shares, participa
         sigma=sigma,
         horizon=horizon,
         sims=sims,
-        total_shares=total_shares,
-        participation_frac=participation_frac
+        total_shares=total_shares
     )
 
 
@@ -106,8 +102,7 @@ def run_monte_carlo_tab(
     mc_vol: float,
     mc_horiz: int,
     mc_sims: int,
-    total_shares: float,
-    participation_frac: float
+    total_shares: float  
 ):
     """
     Monte Carlo Simulation Analysis:
@@ -117,39 +112,22 @@ def run_monte_carlo_tab(
       4. Simulated price paths
     """
  # ——— Introduction ———
-    st.markdown("# TWAP vs Fixed-Notional")
-    st.markdown(
-        "This section runs a Geometric Brownian Motion simulation for future prices,\n"
-        "then compares two execution strategies:\n\n"
-        "1. **TWAP** (fixed‐shares per day)\n"
-        "2. **Fixed-Notional** (constant USD per day)\n\n"
-        "We report:\n"
-        "- Price‐based outperformance in basis points\n"
-        "- All simulated price paths"
-    )
-    
-    
+  
+        
     # Prepare constants
     S0      = df['Close'].iloc[-1]
     avg_vol = df['Volume'].mean()
     
-     # Run MC once
+    # Run MC once
     costs_df = cached_run_mc(
         S0, avg_vol,
         mc_drift, mc_vol,
         mc_horiz, mc_sims,
-        total_shares, participation_frac
+        total_shares
     )
-
-    st.markdown(
-        f"- **Horizon:** {mc_horiz} days\n"
-        f"- **Drift:** {mc_drift:.1%} annual\n"
-        f"- **Volatility:** {mc_vol:.1%} annual\n"
-    )
-
     # Identify cost columns dynamically
     cost_cols = list(costs_df.columns)
-    twap_col, vp_col = cost_cols
+    twap_col= cost_cols
 
     # Rebuild price paths for the two outperformance measures
     mu_d = mc_drift / 252.0
@@ -164,6 +142,40 @@ def run_monte_carlo_tab(
     fixed_avg_price = price_paths[1:].mean(axis=0)
     usd_avg_price   = (total_shares * S0) / shares_usd
     bps_diff        = (fixed_avg_price - usd_avg_price) / fixed_avg_price * 1e4
+
+
+    b_mean, b_std = bps_diff.mean(), bps_diff.std()
+
+        # ——— Key Findings ———
+    st.markdown("### Key Findings")
+    st.markdown(f"""
+    - **Average price advantage:** A Fixed-Notional strategy outperforms a fixed-shares (TWAP) strategy by **{b_mean:.1f} bps** on average  
+      (σ = {b_std:.1f} bps) if the execution horizon is **{mc_horiz} days** 
+      with an annualized volatility of **{mc_vol:.1%}**. \n
+    """)
+    st.metric("Mean bps Δ", f"{b_mean:.1f}", f"σ={b_std:.1f}")
+
+    st.markdown("# TWAP vs Fixed-Notional")
+    st.markdown(
+        "This section runs a Geometric Brownian Motion simulation for future prices,\n"
+        "then compares two execution strategies:\n\n"
+        "1. **TWAP** (fixed‐shares per day)\n"
+        "2. **Fixed-Notional** (constant USD per day)\n\n"
+        "We report:\n"
+        "- Price‐based outperformance in basis points\n"
+        "- All simulated price paths"
+    )
+    
+
+    st.markdown(
+        f"- **Horizon:** {mc_horiz} days\n"
+        f"- **Drift:** {mc_drift:.1%} annual\n"
+        f"- **Volatility:** {mc_vol:.1%} annual\n"
+    )
+
+
+    # After computing b_mean, b_std, s_mean, s_std…
+
 
     # 2) Price-based Outperformance (bps)
     st.subheader("1. Price Difference in Basis Points")
@@ -186,17 +198,6 @@ def run_monte_carlo_tab(
     
     st.plotly_chart(fig_bps, use_container_width=True)
     
-    b_mean, b_std = bps_diff.mean(), bps_diff.std()
-
-    # After computing b_mean, b_std, s_mean, s_std…
-
-    # ——— Key Findings ———
-    st.markdown("### Key Findings")
-    st.markdown(f"""
-    - **Average price advantage:** USD-daily outperforms TWAP by **{b_mean:.1f} bps** on average  
-      (σ = {b_std:.1f} bps).
-    """)
-    st.metric("Mean bps Δ", f"{b_mean:.1f}", f"σ={b_std:.1f}")
 
     run_historical_execution_chart(df, total_shares)
    

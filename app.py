@@ -20,10 +20,15 @@ st.title("Share Buyback Pre-Trade Tool")
 
 # ---- SIDEBAR: PARAMETERS ----
 with st.sidebar:
+    
+    st.markdown("---")
+    load_btn = st.button("Start Computation")
+    st.markdown("---")
+
     st.header("Monte Carlo Simulation Parameters")
     mc_sims = st.number_input("Simulations", min_value=1, max_value=10_000, value=100)
     mc_drift = st.number_input("Drift (annualized %)", min_value=0.0, max_value=100.0, value=0.0, step=0.1) / 100.0
-    mc_vol = st.number_input("Volatility (annualized %)", min_value=0.0, max_value=100.0, value=15.0, step=0.1) / 100.0
+    mc_vol = st.number_input("Volatility (annualized %)", min_value=0.0, max_value=100.0, value=25.0, step=0.1) / 100.0
     mc_horiz = st.number_input("Horizon (days)", min_value=1, max_value=2520, value=125)
 
     st.markdown("---")
@@ -32,27 +37,20 @@ with st.sidebar:
     start = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
     end = st.date_input("End Date", value=pd.to_datetime("2023-12-31"))
     S0 = st.number_input("Initial Price", min_value=1.0, max_value=10_000.0, value=100.0)
-    mu = st.number_input("Drift (GBM %) ", min_value=-50.0, max_value=100.0, value=0.0, step=0.1) / 100.0
-    sigma = st.number_input("Volatility (GBM %)", min_value=0.0, max_value=100.0, value=15.0, step=0.1) / 100.0
+  #  mu = st.number_input("Drift (GBM %) ", min_value=-50.0, max_value=100.0, value=0.0, step=0.1) / 100.0
+#    sigma = st.number_input("Volatility (GBM %)", min_value=0.0, max_value=100.0, value=15.0, step=0.1) / 100.0
     avgV = st.number_input("Average Daily Volume", min_value=1, max_value=10_000_000, value=1_000_000)
 
     st.markdown("---")
     st.header("Execution Strategy")
     total_shares = st.number_input("Total Shares (TWAP)", min_value=1, max_value=1_000_000, value=10_000)
-    vp_pct = st.number_input("Participation Rate (%)", min_value=0.0, max_value=100.0, value=10.0, step=0.5) / 100.0
+ #   vp_pct = st.number_input("Participation Rate (%)", min_value=0.0, max_value=100.0, value=10.0, step=0.5) / 100.0
 
-    st.markdown("---")
-    load_btn = st.button("Generate Synthetic Data")
-
+    st.markdown("https://www.joergosterrieder.com/")
 
 # ---- DATA LOADING FUNCTION ----
 def load_data():
-    if source == "Yahoo Finance":
-        return fetch_yahoo(ticker, str(start), str(end))
-    if source == "Upload CSV":
-        return load_csv(upload)
-    # Synthetic GBM
-    return generate_gbm(start, end, S0, mu, sigma, avgV)
+    return generate_gbm(start, end, S0, mc_drift, mc_vol, avgV)
 
 # ---- MAIN ----
 if load_btn:
@@ -68,23 +66,24 @@ if 'df' in st.session_state:
     df = df.sort_values('Date').reset_index(drop=True)
 
     # ---- TABS ----
-    tab_mc, tab_desc, tab_overview, tab_exec, tab_run= st.tabs([
+#    tab_mc, tab_desc, tab_overview, tab_exec, tab_run= st.tabs([
+    tab_mc, tab_desc, tab_run= st.tabs([
         "🎲 TWAP vs Fixed-Notional",
-        "📊 Descriptive Analysis",
-        "📈 Overview & Benchmarks",
-        "⚙️ Execution Strategies",
-        "📊 Running Benchmarks"
+        "📊 Example - Descriptive Analysis",
+#        "📈 Overview & Benchmarks",
+   #     "⚙️ Execution Strategies",
+        "📊 Example - Running Benchmarks"
     ])
 
     # --- TAB 1: Descriptive Analysis ---
     with tab_desc:
         run_descriptive_analysis(df)
     # --- TAB 2: Overview & Benchmarks ---
-    with tab_overview:
-        run_overview_tab(df)
+#   with tab_overview:
+ #       run_overview_tab(df)
     # --- TAB 3: Execution Strategies ---
-    with tab_exec:
-        run_execution_tab(df, total_shares, vp_pct)
+  #  with tab_exec:
+   #     run_execution_tab(df, total_shares, vp_pct)
         
     # --- TAB 4: Running Benchmarks ---
     with tab_run:
@@ -97,6 +96,5 @@ if 'df' in st.session_state:
             mc_vol=mc_vol,
             mc_horiz=mc_horiz,
             mc_sims=mc_sims,
-            total_shares=total_shares,
-            participation_frac=vp_pct
+            total_shares=total_shares
         )
