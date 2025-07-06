@@ -101,4 +101,4 @@ pytest tests/
 
 University of Twente · Bern Business School  
 
-[joergosterrieder.com](https://joergosterrieder.com)
+[www.joergosterrieder.com](https://www.joergosterrieder.com)
