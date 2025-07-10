@@ -1,15 +1,13 @@
 # app.py 
 
 import streamlit as st
-from temp.monte_carlo_tab import run_monte_carlo_tab
 from spend_averages_tab import run_spend_averages_tab
-from temp.stop_after_tab     import run_stop_after_tab  # <-- new
 
 st.set_page_config(page_title="Share Buyback Tool", layout="wide")
 st.title("📈 Share Buyback Tool")
 
 with st.sidebar:
-    st.header("Monte Carlo Settings")
+    st.header("Settings")
     mc_horiz      = st.number_input("Horizon (days)",        1, 2520, 125)
     mc_drift      = st.number_input("Drift (annual %)",      0.0, 100.0,   0.0, step=0.1)/100.0
     mc_vol        = st.number_input("Volatility (annual %)", 0.0, 100.0,  25.0, step=0.1)/100.0
