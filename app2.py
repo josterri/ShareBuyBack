@@ -71,7 +71,7 @@ def analyze_investment_strategy(
     avg_execution_price = total_usd_invested / total_shares_acquired
     simple_avg_price = np.mean(investment_prices, axis=1)
     performance_score = avg_execution_price / simple_avg_price
-    performance_bps = (performance_score - 1) * 10000  # Convert to basis points
+    performance_bps = (1-performance_score) * 10000  # Convert to basis points
     terminal_price = price_paths[:, -1]
     
     # Create results DataFrame
@@ -118,8 +118,8 @@ def plot_terminal_price_distribution(results_df: pd.DataFrame):
 def plot_performance_distribution(results_df: pd.DataFrame):
     """Plots the histogram of the strategy performance in basis points."""
     fig = px.histogram(
-        results_df, x='performance_bps', nbins=75, histnorm='probability density',
-        title='Distribution of Strategy Performance (Negative is Better)',
+        results_df, x='performance_bps', nbins=275, histnorm='probability density',
+        title='Distribution of Strategy Performance (Positive is Better)',
         labels={'performance_bps': 'Performance (bps) vs. Simple Average Price'}
     )
     fig.add_vline(
@@ -217,7 +217,7 @@ def run_full_simulation(s0, mu, sigma, n_days, n_paths, daily_investment):
     return price_paths, results_df
 
 # --- Main Application UI and Logic ---
-st.title("📊 Advanced Investment Strategy Simulator")
+st.title("📊 Advanced Share Buyback Strategy Simulator")
 st.markdown("""
 This application uses a **Monte Carlo simulation** based on **Geometric Brownian Motion (GBM)** to analyze a daily dollar-cost averaging (DCA) investment strategy. 
 Configure the market and strategy parameters in the sidebar, then click "Run Simulation" to explore the results across thousands of potential market scenarios.
@@ -255,14 +255,14 @@ if 'results_df' in st.session_state and isinstance(st.session_state.results_df, 
     # --- Key Metrics ---
     results = st.session_state.results_df
     perf_bps = results['performance_bps']
-    favorable_outcomes = (perf_bps < 0).sum()
+    favorable_outcomes = (perf_bps > 0).sum()
     favorable_percentage = (favorable_outcomes / len(results)) * 100
     p5, p95 = perf_bps.quantile([0.05, 0.95])
 
     st.subheader("Key Performance Indicators (KPIs)")
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Median Performance", f"{perf_bps.median():.1f} bps", help="The 50th percentile outcome. Negative is better.")
-    col2.metric("Mean Performance", f"{perf_bps.mean():.1f} bps", help="The average outcome across all simulations. Negative is better.")
+    col1.metric("Median Performance", f"{perf_bps.median():.1f} bps", help="The 50th percentile outcome. Positive is better.")
+    col2.metric("Mean Performance", f"{perf_bps.mean():.1f} bps", help="The average outcome across all simulations. Positive is better.")
     col3.metric("Favorable Outcomes", f"{favorable_percentage:.1f}%", help="The percentage of simulations where the strategy's average price was better than the simple average (Performance < 0 bps).")
     col4.metric("Std. Dev. of Performance", f"{perf_bps.std():.1f} bps", help="Measures the dispersion or 'risk' of the performance. Higher values mean more uncertainty.")
     st.markdown(f"**90% Confidence Interval for Performance:** The performance landed between `{p5:.1f}` bps and `{p95:.1f}` bps in 90% of the simulations.")
@@ -274,7 +274,7 @@ if 'results_df' in st.session_state and isinstance(st.session_state.results_df, 
     with tab1:
         st.markdown("""
         These charts show the statistical distribution of the two key outcomes: the **strategy's performance** and the **final asset price**.
-        The performance is measured in basis points (bps) versus the simple average price. **Negative is better.**
+        The performance is measured in basis points (bps) versus the simple average price. **Positive is better.**
         """)
         c1, c2 = st.columns(2)
         with c1:
