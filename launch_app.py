@@ -18,7 +18,7 @@ def stream_process(stream):
         print(line, end='')
 
 base_path = os.path.dirname(__file__)
-app_path = os.path.join(base_path, "app2.py")
+app_path = os.path.join(base_path, "app3.py")
 
 # Find a free port
 port = find_free_port()
